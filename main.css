@@ -1,0 +1,79 @@
+html {
+    background-color: #e6e9e9;
+
+}
+
+body {
+    margin: 0 auto;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5em;
+    color: #545454;
+    background-color: #ffffff;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.06);
+}
+
+#header{
+    height: 10%;
+    min-height: 40px;
+    width: 100%;
+    background:  #e9e9e9;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    color:black;
+    box-shadow: 0px 2px 20px black;
+    position: relative;
+    z-index: 1;
+}
+#header > div{
+    width:20%;
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
+    vertical-align: bottom;
+    display: inline-block;
+    background: #e9e9e9;
+}
+#header > div:hover{
+    cursor: pointer;
+    color:#85ADFF;   
+}
+#header > h1{
+    font-size-adjust: auto; 
+}
+.container {
+    height:90%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    z-index: 0;
+}
+#dataByTypePage, #dataCatelogPage { 
+    width:100%; 
+    height:100%; 
+    padding: 0;
+    margin: 0;
+    display: none; 
+}
+#map{
+    width: 100%;
+    height: 100%;
+    border: 2px solid black;
+}
+#dataCatelogPage > iframe {
+    width: 100%;
+    height: 100%;
+}
+
+
+
+
+#footer{
+ width: 100%;
+    height:3%;
+    background-color: #29293D;
+    
+}

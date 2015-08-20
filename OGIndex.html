@@ -1,0 +1,208 @@
+<html>
+<head>
+   <link rel="stylesheet" type="text/css" href="main.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+    <style>
+      path {
+        stroke: white;
+        stroke-width: 0.5px;
+        fill: black;
+      }
+    </style>
+    
+    <script>
+    $(document).ready(function() {
+        $("#map").hide();
+        $("#dataByType").click(function(){ 
+            $(".container>div").hide();
+            $("#dataByTypePage").show(); 
+            
+        }); 
+        $("#dataByPlace").click(function(){ 
+            $(".container>div").hide();
+            $("#map").show();
+        }); 
+        $("#dataCatelog").click(function(){ 
+            $(".container>div").hide();
+            $("#dataCatelogPage").show(); 
+        }); 
+var windowWidth = window.innerWidth;
+var windowHeight = window.innerHeight;
+
+
+var width = windowWidth,
+    height = windowHeight,
+    active = d3.select(null);
+
+var zoom = d3.behavior.zoom()
+    .translate([0, 0])
+    .scale(1)
+    .scaleExtent([3, 3])
+    .on("zoom", zoomed);
+//create map svg
+var svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style("border","1px solid black")
+
+//Create background
+svg.append("rect")
+    .attr("class", "background")
+    .attr("width", width)
+    .attr("height", height)
+    .style("fill","none")
+    .on("click", reset);
+
+//set map projection
+var projection = d3.geo.mercator()
+    .center([0, 20 ])
+    .scale(150)
+    .rotate([-10,0]);
+
+
+//set Path projections
+var path = d3.geo.path().projection(projection);
+
+var g = svg.append("g");
+
+svg
+    .call(zoom.event);
+
+d3.json('countries.topo.json', function(error, Geodata){
+
+d3.json("https://peter.demo.socrata.com/resource/4ckz-viid.json?$$app_token=B1KI2KkdyZsQb3k0JG08cCCth&$select=iso,count(name)&$group=iso", function(error, data){
+
+        //Check data
+        console.log(Geodata);
+        console.log(data);
+
+        //Convert to GeoJSON
+        var topo = topojson.feature(Geodata, Geodata.objects.countries);
+        
+        //Make map
+        g.selectAll("world-topo")
+            .data(topo.features)
+                .enter()
+            .append("path")
+            .attr("class", function(d) { return "country "+ d.id; })
+            .attr("d", path)
+            .style("fill", "black")
+            .on("mouseover", function(d){ d3.select(this).style("fill","red"); })
+            .on("mouseout",function(d){
+            d3.select(this).style("fill","black");
+            var className = ""
+            for(var i=0; i<data.length; i++)
+                {
+                if(data[i].count_name = 1)
+                    {
+                    className = ".country."+data[i].iso;
+                    d3.select(className).style("fill","green");
+                    }   
+                else
+                    {
+                    className = ".country."+data[i].iso;
+                    d3.select(className).style("fill","red");
+                    }
+                }
+            })
+            .on("click", country_clicked)
+            ;
+
+        var className = "";
+
+        
+        for(var i=0; i<data.length; i++)
+        {
+            if(data[i].count_name = 1)
+            {
+                className = ".country."+data[i].iso;
+                d3.select(className).style("fill","green");
+            }
+            else
+            {
+                className = ".country."+data[i].iso;
+                d3.select(className).style("fill","red");
+            }
+        }
+    });
+    });
+
+function country_clicked(d) {
+  if (active.node() === this) return reset();
+  active.classed("active", false);
+  active = d3.select(this).classed("active", true);
+
+  var bounds = path.bounds(d),
+      dx = bounds[1][0] - bounds[0][0],
+      dy = bounds[0][1] - bounds[0][1],
+      x = (bounds[0][0] + bounds[1][0]) / 2
+      y = (bounds[0][1] + bounds[1][1]) / 2,
+      scale = 0.4 / Math.max(2* dx / width, 2* dy / height),
+      translate = [width /2 - scale * x, height/2 - scale * y];
+
+  svg.transition()
+      .duration(750)
+      .call(zoom.translate(translate).scale(scale).event);
+}
+
+function reset() {
+  active.classed("active", false);
+  active = d3.select(null);
+
+  svg.transition()
+      .duration(750)
+      .call(zoom.translate([0, 0]).scale(1).event);
+}
+
+function zoomed() {
+  g.style("stroke-width", 1.5 / d3.event.scale + "px");
+  g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
+
+// If the drag behavior prevents the default click,
+// also stop propagation so we don’t click-to-zoom.
+function stopped() {
+  if (d3.event.defaultPrevented) d3.event.stopPropagation();
+}
+});
+    </script>
+    </head>
+<body>
+    <div id="header">
+        <div id="dataByType">
+            <h3>Data By Type</h3>
+        </div>
+        
+        <div id="dataByPlace">
+            <h3>Data By Place</h3>
+        </div>
+        
+        <div id="dataCatelog">
+            <h3>Data Catelog</h3>
+        </div>
+    </div>
+
+    
+    <div class="container">
+    
+    <div id="dataByTypePage">
+    
+    </div>
+    <div id="map">
+    
+    
+    </div>
+        
+    <div id="dataCatelogPage">
+        
+    
+    </div>
+    </div>
+    <div id="footer">
+    
+    
+    </div>
+    </body>
+</html>
