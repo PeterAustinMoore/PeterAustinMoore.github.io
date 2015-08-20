@@ -24,6 +24,7 @@
             position: fixed;
             z-index: 1;
             margin-top:-40px;
+            background: white;
         }
         #Apply_header{
             height:100%;
@@ -149,7 +150,9 @@
             id: 'mapbox.light'
         }).addTo(map);
 
+        //Disable scrolling and dragging
         map.dragging.disable();
+        map.scrollWheelZoom.disable();
 
         // control that shows state info on hover
         var info = L.control();
