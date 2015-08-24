@@ -64,11 +64,12 @@
 <script src="MarkerCluster.js"></script>
 <script type="text/javascript" src="states.js"></script>
 <script type="text/javascript">
-    d3.json("https://fedspending.demo.socrata.com/resource/scbm-6423.json?$$app_token=B1KI2KkdyZsQb3k0JG08cCCth&$select=recipient_state,sum(funding_action_obligation)&$group=recipient_state&award_mod=ORIG", function(error, data){ 
+    d3.json("https://fedspending.demo.socrata.com/resource/scbm-6423.json?$$app_token=B1KI2KkdyZsQb3k0JG08cCCth&$select=recipient_state,count(program_activity_code),sum(funding_action_obligation)&$group=recipient_state&award_mod=ORIG", function(error, data){ 
         //console.log(data);
         
 		$.each(states.features, function(j){
             states.features[j].properties["funding"] = 0;
+            states.features[j].properties["programs"] = 0;
         });
 
         $.each(data, function(i){
@@ -77,7 +78,9 @@
                 if(data[i].recipient_state == states.features[j].id)
                 {
                     states.features[j].properties["funding"] = parseInt(data[i].sum_funding_action_obligation);
+                    states.features[j].properties["programs"] = data[i].count_program_activity_code;
                     console.log(states.features[j].properties.funding);
+                    console.log(states.features[j].properties.programs)
                 }
 
             });
@@ -109,7 +112,7 @@
 
         info.update = function (props) {
             this._div.innerHTML = '<h4>Total Funding Action Obligation:</h4>' +  (props ?
-                '<b>' + props.name + '</b><br />' + "$" + numberWithCommas(props.funding)
+                '<b>' + props.name + '</b><br />'+props.programs + " programs funded for: "+"<br>$" + numberWithCommas(props.funding)
                 : 'Hover over a state');
         };
 
