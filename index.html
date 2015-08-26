@@ -143,11 +143,9 @@
         }
 
         function highlightFeature(e) {
-        	var layer = e.target;
-        	if(map.getZoom() < 10)
-        	{
-            
 
+        	var layer = e.target;
+            
             layer.setStyle({
                 weight: 5,
                 color: '#666',
@@ -160,30 +158,21 @@
             }
 
             info.update(layer.feature.properties);
-        	}
-        	else
-        	{
-        		layer.setStyle({
-        			fillOpacity:0
-        		});
-        	}
-		
+
+			
+
+			
         	
         }
 
         var geojson;
 
         function resetHighlight(e) {
-        	if(map.getZoom() < 10)
-        	{
+
             geojson.resetStyle(e.target);
             info.update();
-        	}
-        	else
-        	{
-        		geojson.setStyle({fillOpacity:0});
-        	}
-			
+     
+        	
         }
 
         var targetState = ""; 
@@ -191,12 +180,7 @@
 
         function zoomToFeature(e) {
         	var zoomLevel = map.getZoom();
-        	console.log(zoomLevel);
-
-        	if(zoomLevel<10)
-        	{
-        		           	geojson.setStyle({fillOpacity:0.7});
-        	}
+        	//console.log(zoomLevel);
 
         	if(isClicked && targetState == e.target.feature.id && zoomLevel > 4 && zoomLevel < 10)
         	{
@@ -209,6 +193,7 @@
         	{         
         		markers.clearLayers();
         		map.fitBounds(e.target.getBounds());
+
         		targetState = e.target.feature.id;
         		isClicked = true;
 
@@ -243,16 +228,36 @@
             layer.on({
                 mouseover: highlightFeature,
                 mouseout: resetHighlight,
-                click: zoomToFeature
+                click: zoomToFeature,
             });
 
         }
+
+
 
         
         geojson = L.geoJson(states, {
             style: style,
             onEachFeature: onEachFeature
         }).addTo(map);
+
+
+        map.on("zoomend",clearColors);
+
+
+        function clearColors(){
+        	
+        	if(map.getZoom()>8)
+        	{
+        		console.log("zoomed in");
+        	}
+        	else{
+        		console.log("zoomed out");
+        	}
+
+        	
+        }
+
 
 
         var legend = L.control({position: 'bottomright'});
