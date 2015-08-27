@@ -86,7 +86,7 @@
             });
         });
 		
-        var map = L.map('map').setView([45, -100], 2);
+        var map = L.map('map').setView([45, -100], 3);
         var mapBounds = map.getBounds();
         var isClicked = false;
 
@@ -98,7 +98,6 @@
         }).addTo(map);
 
         //Disable scrolling and dragging
-        map.dragging.disable();
         map.scrollWheelZoom.disable();
 
         // control that shows state info on hover
