@@ -86,7 +86,7 @@
             });
         });
 		
-        var map = L.map('map').setView([45, -100], 3);
+        var map = L.map('map').setView([45, -100], 4);
         var mapBounds = map.getBounds();
         var isClicked = false;
 
@@ -136,26 +136,25 @@
                 opacity: 1,
                 color: 'white',
                 dashArray: '3',
-                fillOpacity: 0.8,
+                fillOpacity: 1,
                 fillColor: getColor(feature.properties.funding)
             };
         }
 
         function highlightFeature(e) {
-
+            
         	var layer = e.target;
             
             layer.setStyle({
                 weight: 5,
                 color: '#666',
                 dashArray: '',
-                fillOpacity: 0.4
             });
 
             if (!L.Browser.ie && !L.Browser.opera) {
                 layer.bringToFront();
             }
-
+        
             info.update(layer.feature.properties);
         	
         }
@@ -231,25 +230,6 @@
             style: style,
             onEachFeature: onEachFeature
         }).addTo(map);
-
-
-        map.on("zoomend",clearColors);
-
-
-        function clearColors(){
-        	
-        	if(map.getZoom()>8)
-        	{
-        		geojson.on('mouseover',geojson.setStyle({fillOpacity:0}));
-        		console.log("zoomed in");
-        	}
-        	else{
-        		geojson.on('mouseover',geojson.setStyle({fillOpacity:0}));
-        		console.log("zoomed out");
-        	}
-
-        	
-        }
 
 
 
