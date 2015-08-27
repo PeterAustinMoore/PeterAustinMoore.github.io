@@ -64,6 +64,13 @@
 <script src="MarkerCluster.js"></script>
 <script type="text/javascript" src="states.js"></script>
 <script type="text/javascript">
+        function numberWithCommas(x) {
+           return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+    d3.json("https://fedspending.demo.socrata.com/resource/scbm-6423.json?$$app_token=B1KI2KkdyZsQb3k0JG08cCCth&$select=recipient_name,funding_action_obligation,location_recipient&&award_mod=ORIG", function(MarkerData) {
+
+
     d3.json("https://fedspending.demo.socrata.com/resource/scbm-6423.json?$$app_token=B1KI2KkdyZsQb3k0JG08cCCth&$select=recipient_state,count(program_activity_code),sum(funding_action_obligation)&$group=recipient_state&award_mod=ORIG", function(error, data){ 
         //console.log(data);
         
@@ -100,6 +107,25 @@
         //Disable scrolling and dragging
         map.scrollWheelZoom.disable();
 
+
+
+        var lat = 0, lng = 0;
+
+        var markers = new L.MarkerClusterGroup({showCoverageOnHover: false, spiderfyDistanceMultiplier:2});
+
+        $.each(MarkerData, function(i){
+            if(MarkerData[i].location_recipient.latitude)
+            {
+                lat = MarkerData[i].location_recipient.latitude;
+                lng = MarkerData[i].location_recipient.longitude;
+                var marker = L.marker([lat,lng]);
+                marker.bindPopup("<p>"+MarkerData[i].recipient_name+": $"+numberWithCommas(MarkerData[i].funding_action_obligation)+"</p>", {showOnMouseOver:true}); 
+                markers.addLayer(marker);
+            }
+            });
+        map.addLayer(markers);
+
+
         // control that shows state info on hover
         var info = L.control();
 
@@ -117,9 +143,7 @@
 
         info.addTo(map);
 
-        function numberWithCommas(x) {
- 		   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-		}
+
 
         // get color depending on population density value
         function getColor(d) {
@@ -136,7 +160,7 @@
                 opacity: 1,
                 color: 'white',
                 dashArray: '3',
-                fillOpacity: 1,
+                fillOpacity: 0.6,
                 fillColor: getColor(feature.properties.funding)
             };
         }
@@ -169,7 +193,7 @@
         }
 
         var targetState = ""; 
-        var markers = new L.MarkerClusterGroup({showCoverageOnHover: false, spiderfyDistanceMultiplier:2});
+        
 
         function zoomToFeature(e) {
         	var zoomLevel = map.getZoom();
@@ -179,38 +203,14 @@
         	{
         	map.setView([45, -100], 3);
            	isClicked = false;
-           	markers.clearLayers();
 
         	}
         	else
         	{         
-        		markers.clearLayers();
         		map.fitBounds(e.target.getBounds());
 
         		targetState = e.target.feature.id;
-        		isClicked = true;
-
-        		$.getJSON("https://fedspending.demo.socrata.com/resource/scbm-6423.json?$$app_token=B1KI2KkdyZsQb3k0JG08cCCth&$select=recipient_name,funding_action_obligation,location_recipient&recipient_state="+e.target.feature.id+"&award_mod=ORIG", function(data) {
-        			console.log(data);
-
-        			var lat = 0;
-        			var lng = 0;
-
-
-        			$.each(data, function(i){
-					if(data[i].location_recipient.latitude)
-        			{
-        				lat = data[i].location_recipient.latitude;
-        				lng = data[i].location_recipient.longitude;
-        				var marker = L.marker([lat,lng]);
-        				marker.bindPopup("<p>"+data[i].recipient_name+": $"+numberWithCommas(data[i].funding_action_obligation)+"</p>", {showOnMouseOver:true}); 
-        				markers.addLayer(marker);
-        			}
-        			});
-        		map.addLayer(markers);
-        		});
-
-        		
+        		isClicked = true;       		
         	}
 			
             
@@ -231,6 +231,11 @@
             onEachFeature: onEachFeature
         }).addTo(map);
 
+
+
+
+
+        
 
 
         var legend = L.control({position: 'bottomright'});
@@ -257,6 +262,8 @@
 
         legend.addTo(map);
     });
+
+});
     </script>
 </body>
 </html>
