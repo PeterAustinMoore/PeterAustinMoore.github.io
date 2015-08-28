@@ -1,10 +1,332 @@
-<html>
+<htmL>
 <head>
+<title>Treasury Map Demo</title>
+
+
+	<!--metadata-->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    	<!--Stylesheets and styles-->
+		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+		<link rel="stylesheet" href="http://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.Default.css" />
+        <style>
+        html, body{
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            float:left;
+            margin:0;
+        }
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            margin-right: 10px;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+
+        .legend {
+            text-align: left;
+            line-height: 18px;
+            color: #555;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+    </style>
+
+    <!--SCRIPTS-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+
+
 </head>
 <body>
-<iframe width="900px" height="380px" frameborder="0" src="/"></iframe>
+<div id="map"></div>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+<script src="MarkerCluster.js"></script>
+<script type="text/javascript" src="states.js"></script>
+<script type="text/javascript">
+        function numberWithCommas(x) {
+           return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+    d3.json("https://fedspending.demo.socrata.com/resource/scbm-6423.json?$$app_token=B1KI2KkdyZsQb3k0JG08cCCth&$select=recipient_name,funding_action_obligation,location_recipient&&award_mod=ORIG", function(MarkerData) {
+
+
+    d3.json("https://fedspending.demo.socrata.com/resource/scbm-6423.json?$$app_token=B1KI2KkdyZsQb3k0JG08cCCth&$select=recipient_state,count(program_activity_code),sum(funding_action_obligation)&$group=recipient_state&award_mod=ORIG", function(error, data){ 
+        //console.log(data);
+        
+		$.each(states.features, function(j){
+            states.features[j].properties["funding"] = 0;
+            states.features[j].properties["programs"] = 0;
+        });
+
+        $.each(data, function(i){
+            $.each(states.features, function(j)
+            {
+                if(data[i].recipient_state == states.features[j].id)
+                {
+                    states.features[j].properties["funding"] = parseInt(data[i].sum_funding_action_obligation);
+                    states.features[j].properties["programs"] = data[i].count_program_activity_code;
+                    console.log(states.features[j].properties.funding);
+                    console.log(states.features[j].properties.programs)
+                }
+
+            });
+        });
+		
+        //CREATE GEOJSON BASE
+        var geojson = L.geoJson(states, {
+            style: style,
+            onEachFeature: onEachFeature
+        });
+
+        //CREATE MARKER BASE
+        var lat = 0, lng = 0;
+
+        var markers = new L.MarkerClusterGroup({showCoverageOnHover: false, spiderfyDistanceMultiplier:2});
+
+        $.each(MarkerData, function(i){
+            if(MarkerData[i].location_recipient.latitude)
+            {
+                lat = MarkerData[i].location_recipient.latitude;
+                lng = MarkerData[i].location_recipient.longitude;
+                var marker = L.marker([lat,lng]);
+                marker.bindPopup("<p>"+MarkerData[i].recipient_name+": $"+numberWithCommas(MarkerData[i].funding_action_obligation)+"</p>", {showOnMouseOver:true}); 
+                markers.addLayer(marker);
+            }
+            });
 
 
 
+        //Group the data layers
+        //var choropleth = L.layerGroup(geojson);
+        //var points = L.layerGroup(markers);
+
+        //Set Basemap
+        var Lightbase = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoic29jcmF0YSIsImEiOiJNdXpEYnI0In0.dOGNZxlG1St0gsghltTcAw', {
+            maxZoom: 15,
+            //minZoom: 2,
+            attribution: '',
+            id: 'mapbox.light'
+        });
+        var StreetsBase = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoic29jcmF0YSIsImEiOiJNdXpEYnI0In0.dOGNZxlG1St0gsghltTcAw', {
+            maxZoom: 15,
+            //minZoom: 2,
+            attribution: '',
+            id: 'mapbox.streets'
+        });
+
+        //Create Overlay Maps and base
+        var baseLayer = {
+            "Grey": Lightbase,
+            "Streets": StreetsBase
+        }
+        var overlayMaps = {
+            "Grant totals by State" : geojson,
+            "Individual Grants" : markers
+        }
+        
+        //CREATE THE MAP
+        var map = L.map('map',{
+            center: [45, -100],
+            zoom: 3,
+            layers: [StreetsBase, geojson, markers]
+        });
+
+        var isClicked = false;
+
+
+        //Disable scrolling and dragging
+        map.scrollWheelZoom.disable();
+
+        //SET ON CLICK FOR MAP TO READJUST
+        map.on('click', function() { map.setView([45, -100],5); });
+
+        //SET ON CLICK FOR GEOJSON TO READJUST
+        geojson.on('click', function() { map.setView([45, -100],3); });
+
+
+
+
+        // control that shows state info on hover
+
+            var info = L.control();
+
+            info.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info');
+                this.update();
+                return this._div;
+            };
+
+            info.update = function (props) {
+                if(map.hasLayer(geojson))
+                {
+                this._div.innerHTML = '<h4>Total Funding Action Obligation:</h4>' +  (props ?
+                    '<b>' + props.name + '</b><br />'+props.programs + " programs funded for: "+"<br>$" + numberWithCommas(props.funding)
+                    : 'Hover over a state');
+                }
+                if(!map.hasLayer(geojson))
+                {
+                this._div.innerHTML = '<h4>Individual Grants by Location</h4>' +  (props ?
+                    props
+                    : 'Select a cluster or marker');
+                }
+            };
+
+            info.addTo(map);
+
+
+        //Create layer control
+        L.control.layers(baseLayer, overlayMaps, {collapsed:false}).addTo(map);
+
+
+        //CHANGE UPDATE IF GEOJSON ISN"T PRESENT
+        map.on('overlayadd', function(){
+            info.update();
+            if(map.hasLayer(geojson))
+            {
+                $(".legend").show();
+            }
+
+        });
+        map.on('overlayremove', function(){
+            info.update();
+            if(!map.hasLayer(geojson))
+            {
+                $(".legend").hide();
+            }
+        });
+
+
+        // get color depending on population density value
+        function getColor(d) {
+            return	d > 4500000		? '#045a8d'	:
+            		d > 3000000   	? '#2b8cbe' :
+            	   	d > 1500000   	? '#74a9cf' :
+                   	d > 500000   	? '#bdc9e1' :
+                             '#f1eef6';
+        }
+
+        //FEATURE STYLES FOR GEOJSON
+        function style(feature) {
+            return {
+                weight: 2,
+                opacity: 1,
+                color: 'white',
+                dashArray: '3',
+                fillOpacity: 0.6,
+                fillColor: getColor(feature.properties.funding)
+            };
+        }
+
+
+        //STYLE FEATURES FOR HIGHLIGHTING
+        function highlightFeature(e) {
+            
+        	var layer = e.target;
+            
+            layer.setStyle({
+                weight: 5,
+                color: '#666',
+                dashArray: '',
+            });
+
+            if (!L.Browser.ie && !L.Browser.opera) {
+                layer.bringToFront();
+            }
+        
+            info.update(layer.feature.properties);
+        	
+        }
+
+        //RESET LAYER STYLING
+        function resetHighlight(e) {
+
+            geojson.resetStyle(e.target);
+            info.update();
+        	
+        }
+
+        var targetState = ""; 
+        
+        //ZOOM TO THE FEATURE WHEN IT IS CLICKED ---CURRENTLY NOT ENABLED
+        function zoomToFeature(e) {
+
+        	if(isClicked && targetState == e.target.feature.id && zoomLevel > 4 && zoomLevel < 10)
+        	{
+        	map.setView([45, -100], 3);
+           	isClicked = false;
+
+        	}
+        	else
+        	{         
+        		map.fitBounds(e.target.getBounds());
+        		targetState = e.target.feature.id;
+        		isClicked = true;       		
+        	}
+			
+            
+        }
+
+        //ADD FEATURES TO EACH GEOJSON LAYER --CLICK DISABLED
+        function onEachFeature(feature, layer) {
+
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight,
+                //click: zoomToFeature,
+            });
+
+        }
+        
+
+
+
+        var legend = L.control({position: 'bottomright'});
+
+        legend.onAdd = function (map) {
+
+            var div = L.DomUtil.create('div', 'info legend'),
+                grades = [0,500000, 1500000,3000000,4500000],
+                labels = [],
+                from, to;
+
+            for (var i = 0; i < grades.length; i++) {
+                from = grades[i];
+                to = grades[i + 1];
+
+                labels.push(
+                    '<i style="background:' + getColor(from + 1) + '"></i> ' +
+                    "$"+ numberWithCommas(from) + (to ? '&ndash;' + "$"+ numberWithCommas(to) : '+'));
+            }
+
+            div.innerHTML = labels.join('<br>');
+            return div;
+        };
+
+        legend.addTo(map);
+    });
+
+});
+    </script>
 </body>
 </html>
