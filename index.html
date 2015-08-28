@@ -196,7 +196,7 @@
 
 
         //Create layer control
-        L.control.layers(baseLayer, overlayMaps).addTo(map);
+        L.control.layers(baseLayer, overlayMaps, {collapsed:false}).addTo(map);
 
 
         //CHANGE UPDATE IF GEOJSON ISN"T PRESENT
