@@ -202,9 +202,18 @@
         //CHANGE UPDATE IF GEOJSON ISN"T PRESENT
         map.on('overlayadd', function(){
             info.update();
+            if(map.hasLayer(geojson))
+            {
+                $(".legend").show();
+            }
+
         });
         map.on('overlayremove', function(){
             info.update();
+            if(!map.hasLayer(geojson))
+            {
+                $(".legend").hide();
+            }
         });
 
 
