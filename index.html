@@ -12,6 +12,7 @@
     <!--Stylesheets and styles-->
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
     <style>
+
         html, body{
             margin: 0;
             padding: 0;
@@ -58,15 +59,13 @@
         #map {
             width: 100%;
             height: 500px;
-            float:left;
             margin:0;
         }
         #dataVis{
             width:100%;
             height:500px;
-            float:right;
             margin:0;
-            overflow: hidden;
+            background: green;
         }
         .info {
             padding: 6px 8px;
@@ -95,7 +94,54 @@
             opacity: 0.7;
         }
 
-        #apply, #donate{
+        #apply{
+            background: red;
+            margin:0;
+        }
+        #apply>h1{
+            text-align: center;
+        }
+        #selector{
+            text-align: center;
+        }
+        .button {
+           border-top: 1px solid #96d1f8;
+           background: #65a9d7;
+           background: -webkit-gradient(linear, left top, left bottom, from(#3e779d), to(#65a9d7));
+           background: -webkit-linear-gradient(top, #3e779d, #65a9d7);
+           background: -moz-linear-gradient(top, #3e779d, #65a9d7);
+           background: -ms-linear-gradient(top, #3e779d, #65a9d7);
+           background: -o-linear-gradient(top, #3e779d, #65a9d7);
+           padding: 5px 10px;
+           -webkit-border-radius: 8px;
+           -moz-border-radius: 8px;
+           border-radius: 8px;
+           -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+           -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+           box-shadow: rgba(0,0,0,1) 0 1px 0;
+           text-shadow: rgba(0,0,0,.4) 0 1px 0;
+           color: white;
+           font-size: 14px;
+           font-family: Georgia, serif;
+           text-decoration: none;
+           vertical-align: middle;
+           }
+        .button:hover {
+           border-top-color: #28597a;
+           background: #28597a;
+           color: #ccc;
+           }
+        .button:active {
+           border-top-color: #1b435e;
+           background: #1b435e;
+           }
+        #USApplication, #AppPage1, #AppPage2, #AppPage3
+        {
+            display: none;
+        }
+        #breadCrumbs{
+            width:100%;
+            height:100px;
             background: blue;
         }
     </style>
@@ -107,20 +153,35 @@
 
     <script>
         $(document).ready(function(){
-            var height = window.height;
-            var width = window.width;
+            var height = $(window).height();
+            var width = $(window).width();
 
             console.log(height);
             console.log(width);
 
-            document.getElementById("apply").style.height = "'"+height+"px'";
-            document.getElementById("host").style.height = height;
-            document.getElementById("donate").style.height = height;
-
-            document.getElementById("apply").style.width = "'"+width+"px'";
-            document.getElementById("host").style.width = width;
-            document.getElementById("donate").style.width = width;
+            
+            $("#apply").css("height",height.toString()+"px");
+        
         });
+        function USApp() {
+            function showApp(){
+                $("#AbroadApp").hide();
+                $("#USApplication").show();
+                console.log("show app");
+            }
+
+            showApp();
+
+
+        }
+        function AbroadApp(){
+            function showApp(){
+                $("#USApplication").hide();
+                $("#AbroadApplication").show();
+                console.log("Show app");
+            }
+            showApp();
+        }
     </script>
 </head>
 <body>
@@ -133,12 +194,38 @@
 
     <div id="banner"></div>
 
-    <div id="map"></div>
+    <div id ="mapContainer">
+        <div id="map"></div>
+        <div id="dataVis"></div>
+    </div>
 
-    <div id="dataVis"></div>
+    <div id="apply" class="container">
+        <h1 id="applyTitle">Apply</h1>
+        <div id="selector">
+            <button onclick="USApp()" class="button">Apply to come to the US</button>
+            <button onclick="AbroadApp()" class="button">Apply to leave US</button>
+        </div>
+        <div id="Apps">
+        <div id="USApplication">
+            <div id="breadCrumbs"></div>
+            <div id="AppPage1">
+                <h1 id="AppPage1Title">Can You Apply?</h1>
+                <p id="AppPage1Text"></p>
+            </div>
+            <div id="AppPage2">
+                <h1 id="AppPage2Title">Can You Apply?</h1>
+                <p id="AppPage2Text"></p>
+            </div>
+            <div id="AppPage3">
+                <h1 id="AppPage3Title">Can You Apply?</h1>
+                <p id="AppPage3Text"></p>
+            </div>
 
-    <div id="apply" class=""></div>
+        </div>
+        <div id="AbroadApplication">
 
+        </div>
+        </div>
     <div id="host"></div>
 
     <div id="donate"></div>
