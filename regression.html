@@ -6,6 +6,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
 	<script src="https://fb.me/react-with-addons-0.13.3.js"></script>
 	<script src="https://fb.me/JSXTransformer-0.13.3.js"></script>
+	<script src="regression.js"></script>
     <!--STYLES-->
     <style>
     html, body {
@@ -117,13 +118,6 @@ var RegressionApp = React.createClass({
 });
 
 var C1 = React.createClass({
-    getInitialState: function()
-    {
-    	return ({
-    		jsonData: '',
-    		isDataSet: false
-    		})
-    },
     render: function()
     {
         return (
@@ -197,15 +191,24 @@ var	GetOptions = React.createClass({
 });
 //Get the header rows and populate the drop down menus
 var DoStats = React.createClass({
+	getInitialState: function()
+	{
+		return ({
+			m: 0,
+			b: 0
+			})
+	},
 	render: function()
 	{
+
 		if(this.props.data)
 		{
+
+		console.log(this.getResults(this.props.data));
 		return(
 		<div>
 		<h3>The Count is: {this.getCount(this.props.data)} </h3>
-		<h3>The Sum of x values is: {this.getSumX(this.props.data)} </h3>
-		<h3>Equation: X </h3>
+		<h3>Equation: {this.props.y} = {this.getB(this.props.data)}{this.props.x}  </h3>
 		<Graphs data={this.props.data} />
 		</div>
 			
@@ -217,6 +220,18 @@ var DoStats = React.createClass({
 			<h3>Awaiting Input...</h3>
 			)
 		}
+	},
+	getResults: function(data)
+	{
+		var x = this.props.x;
+		var y = this.props.y;
+		var dataset = [];
+		$.each(data, function(i, data){
+			arr = [parseInt(data[x]), parseInt(data[y])];
+			dataset.push(arr);
+		});
+		var results = regression('linear', dataset);
+		return results;
 	},
 	getCount: function(data)
 	{
@@ -235,25 +250,46 @@ var DoStats = React.createClass({
 		});
 		return sum;
 	}, 
-	getSumY: function(data, y)
+	getSumY: function(data)
 	{
-
+		var y = this.props.y;
+		var sum = 0;
+		$.each(data, function(i, data){
+			sum += parseInt(data[y]);
+		});
+		return sum;
 	},
-	getSumXY: function(data, x, y)
+	getSumXY: function(data)
 	{
-
+		var x = this.props.x;
+		var y = this.props.y;
+		var sum = 0;
+		$.each(data, function(i, data){
+			sum += parseInt(data[x])*parseInt(data[y]);
+		});
+		return sum;
 	},
-	getSumXX: function(data, x, x)
+	getSumXX: function(data)
 	{
-
+		var x = this.props.x;
+		var sum = 0;
+		$.each(data, function(i, data){
+			sum += parseInt(data[x])*parseInt(data[x]);
+		});
+		return sum;
 	},
-	getM: function(data, x, y)
+	getM: function(data)
 	{
-
+		var m = 0
+		m = ((this.getCount(data)*this.getSumXY(data)) - (this.getSumX(data)*this.getSumY(data)))/((this.getCount(data)*this.getSumXX(data))-(this.getSumX(data)*this.getSumX(data)));
+		return m;
 	},
-	getB: function(data, x, y)
+	getB: function(data)
 	{
-
+		var b = 0;
+		var m = this.getM(data);
+		b = this.getSumY(data)/this.getCount(data) - m*(this.getSumY(data)/this.getCount(data))
+		return b.toString().substr(0,4)+"+"+m.toString().substr(0,4)
 	}
 
 });
