@@ -195,7 +195,8 @@ var DoStats = React.createClass({
 	{
 		return ({
 			m: 0,
-			b: 0
+			b: 0,
+			r: 0
 			})
 	},
 	render: function()
@@ -205,11 +206,17 @@ var DoStats = React.createClass({
 		{
 
 		console.log(this.getResults(this.props.data));
+		var result=	this.getResults(this.props.data);
+
+		var m = result.m.toString().split('.');
+		var b = result.b.toString().split('.');
+		var r = result.r.toString().substr(0,6);
 		return(
 		<div>
 		<h3>The Count is: {this.getCount(this.props.data)} </h3>
-		<h3>Equation: {this.props.y} = {this.getB(this.props.data)}{this.props.x}  </h3>
-		<Graphs data={this.props.data} />
+		<h3>Equation: {this.props.y} = {m[0]}.{m[1].substr(0,2)}{this.props.x} + {b[0]}. {b[1].substr(0,2)}  </h3>
+		<h3>The R^2 value is: {r}</h3>
+		<Graphs data={this.props.data} x={this.props.x} y={this.props.y} />
 		</div>
 			
 		)
@@ -231,7 +238,11 @@ var DoStats = React.createClass({
 			dataset.push(arr);
 		});
 		var results = regression('linear', dataset);
-		return results;
+		return {
+			m: results.equation[0],
+			b: results.equation[1],
+			r: results.corr
+			};
 	},
 	getCount: function(data)
 	{
@@ -240,58 +251,7 @@ var DoStats = React.createClass({
 			count += 1;
 		});
 		return count;
-	},
-	getSumX: function(data)
-	{
-		var x = this.props.x;
-		var sum = 0;
-		$.each(data, function(i, data){
-			sum += parseInt(data[x]);
-		});
-		return sum;
-	}, 
-	getSumY: function(data)
-	{
-		var y = this.props.y;
-		var sum = 0;
-		$.each(data, function(i, data){
-			sum += parseInt(data[y]);
-		});
-		return sum;
-	},
-	getSumXY: function(data)
-	{
-		var x = this.props.x;
-		var y = this.props.y;
-		var sum = 0;
-		$.each(data, function(i, data){
-			sum += parseInt(data[x])*parseInt(data[y]);
-		});
-		return sum;
-	},
-	getSumXX: function(data)
-	{
-		var x = this.props.x;
-		var sum = 0;
-		$.each(data, function(i, data){
-			sum += parseInt(data[x])*parseInt(data[x]);
-		});
-		return sum;
-	},
-	getM: function(data)
-	{
-		var m = 0
-		m = ((this.getCount(data)*this.getSumXY(data)) - (this.getSumX(data)*this.getSumY(data)))/((this.getCount(data)*this.getSumXX(data))-(this.getSumX(data)*this.getSumX(data)));
-		return m;
-	},
-	getB: function(data)
-	{
-		var b = 0;
-		var m = this.getM(data);
-		b = this.getSumY(data)/this.getCount(data) - m*(this.getSumY(data)/this.getCount(data))
-		return b.toString().substr(0,4)+"+"+m.toString().substr(0,4)
 	}
-
 });
 
 
@@ -314,12 +274,15 @@ d3Chart.create = function(el, props, state) {
 			
 			dataset = [];
 
-			$.each(state.data, function(i){
-				var arr = [parseInt(state.data[i].x), parseInt(state.data[i].y)];
+			var x = state.x;
+			var y = state.y;
+			console.log(x, y);
+			$.each(state.data, function(i, data){
+				var arr = [parseInt(data[x]), parseInt(data[y])];
 				dataset.push(arr);
 			});
 
-
+			console.log(dataset);
 			
 			//Create scale functions
 			var xScale = d3.scale.linear()
@@ -384,7 +347,7 @@ d3Chart.create = function(el, props, state) {
 			svg.append('svg:path')
 				.attr('d',line(linedata))
 				.attr('stroke','black')
-				.attr('stroke-width',2)
+				.attr('stroke-width',0)
 				.attr('fill','none');
 			/*
 			svg.selectAll("text")
@@ -423,7 +386,9 @@ d3Chart.create = function(el, props, state) {
 var Chart = React.createClass({
   propTypes: {
     data: React.PropTypes.array,
-    domain: React.PropTypes.object
+    domain: React.PropTypes.object,
+    y: '',
+    x: ''
   },
 
   componentDidMount: function() {
@@ -438,7 +403,9 @@ var Chart = React.createClass({
   getChartState: function() {
     return {
       data: this.props.data,
-      domain: this.props.domain
+      domain: this.props.domain,
+      x: this.props.x,
+      y: this.props.y
     };
   },
 
@@ -483,7 +450,7 @@ var Graphs = React.createClass({
       <div className="App">
         <Chart
           data={this.props.data}
-          domain={this.state.domain} />
+          domain={this.state.domain}  x={this.props.x} y={this.props.y}/>
       </div>
     );
   }
