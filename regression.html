@@ -81,8 +81,8 @@ var RegressionApp = React.createClass({
   getInitialState: function()
   {
      return ({
-     		hostURL: '',
-     		datasetId: '',
+     		hostURL: 'peter.demo.socrata.com',
+     		datasetId: 'ewi6-ky38',
      		headerData:'',
      		dependent:'',
      		independent:'',
@@ -122,8 +122,8 @@ var C1 = React.createClass({
     {
         return (
             <div id="header">
-                <input className="input" type="text" ref="DataId" />
-                <input className="input" type="text" ref="myInput" value="peter.demo.socrata.com" />           
+                <input className="input" type="text" ref="DataId" placeholder="ewi6-ky38"/>
+                <input className="input" type="text" ref="myInput" placeholder="peter.demo.socrata.com" />           
                 <input className="subBtn" type="button" onClick={this.getHeaders} value="Submit"/>
             </div>
         )
@@ -132,6 +132,12 @@ var C1 = React.createClass({
     {
     	var DataId = this.refs.DataId.getDOMNode().value.substr(0,9);
         var DataURL = this.refs.myInput.getDOMNode().value;
+
+        if(!DataId || !DataURL)
+        {
+        	DataURL = "peter.demo.socrata.com";
+        	DataId = "ewi6-ky38";
+        }
         console.log("Data id: " + DataId.toString());
         console.log("Data URL: "+ DataURL.toString());
         $.getJSON("https://"+DataURL+"/resource/"+DataId+"?$limit=2", function(data){
@@ -216,7 +222,7 @@ var DoStats = React.createClass({
 		<h3>The Count is: {this.getCount(this.props.data)} </h3>
 		<h3>Equation: {this.props.y} = {m[0]}.{m[1].substr(0,2)}{this.props.x} + {b[0]}. {b[1].substr(0,2)}  </h3>
 		<h3>The R^2 value is: {r}</h3>
-		<Graphs data={this.props.data} x={this.props.x} y={this.props.y} />
+		<Graphs data={this.props.data} x={this.props.x} y={this.props.y} m={result.m} b={result.b} />
 		</div>
 			
 		)
@@ -336,18 +342,22 @@ d3Chart.create = function(el, props, state) {
 			   .attr("r", 5);
 			   
 
+			console.log(state.m+", "+state.b);
+
 			var line = d3.svg.line()
-						.x(function(d,i){
-							return xLinScale(d[0]);
+						.x(function(d){
+							return xScale(parseInt(d[0]));
 						})
-						.y(function(d,i){
-							return yLinScale(d[1]);
+						.y(function(d){
+							return yScale((state.m*parseInt(d[0]))+state.b);
 						})
 						.interpolate("linear");
+
 			svg.append('svg:path')
-				.attr('d',line(linedata))
+				.attr("class","line")
+				.attr('d',line(dataset))
 				.attr('stroke','black')
-				.attr('stroke-width',0)
+				.attr('stroke-width',1)
 				.attr('fill','none');
 			/*
 			svg.selectAll("text")
@@ -405,7 +415,9 @@ var Chart = React.createClass({
       data: this.props.data,
       domain: this.props.domain,
       x: this.props.x,
-      y: this.props.y
+      y: this.props.y,
+      m: this.props.m,
+      b: this.props.b
     };
   },
 
@@ -450,7 +462,7 @@ var Graphs = React.createClass({
       <div className="App">
         <Chart
           data={this.props.data}
-          domain={this.state.domain}  x={this.props.x} y={this.props.y}/>
+          domain={this.state.domain}  x={this.props.x} y={this.props.y} m={this.props.m} b={this.props.b}/>
       </div>
     );
   }
