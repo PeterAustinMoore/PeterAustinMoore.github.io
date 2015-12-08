@@ -37,4 +37,4 @@ var UI = React.createClass({
   
 });
 
-React.render(<UI/>, document.body);
+ReactDOM.render(<UI/>, document.body);
