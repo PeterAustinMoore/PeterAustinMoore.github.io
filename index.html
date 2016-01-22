@@ -23,6 +23,17 @@ html, body { height:100%;width: 100%;}
 <body>
 	<div id="map">
 	</div>
+	<script>
+	var map = L.map('map').setView([51.505, -0.09], 13);
+	
+	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+	    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+	    maxZoom: 18,
+	    id: 'mapbox.satellite',
+	    accessToken: 'pk.eyJ1IjoicGV0ZWFtb29yZSIsImEiOiJRdzFrVms0In0.ZRWNwRmHIktO5r-rHjwbSw'
+	}).addTo(map);
+
+	</script>
 	<!--
 	<script type="text/jsx" src="Pages/Catalog.jsx"></script>
 	<script type="text/jsx" src="Pages/DatasetView.jsx"></script>
