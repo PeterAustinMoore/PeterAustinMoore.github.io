@@ -1,14 +1,28 @@
-var User = React.createClass({
+var UI = React.createClass({
+  getInitialState: function()
+  {
+    return ({
+      page: <Catalog changePage={this.changePage} />
+    })
+  },
   render: function() {
-    console.log("rendering...")
+    console.log("rendering...");
     return (
       <div>
-        Hello
-        //<Views />
+        {this.state.page}
       </div>
-      )
+      );
+  },
+  changePage: function(page)
+  {
+    if(page=="Visualize")
+    {
+      this.setState({
+        page: <Visualize changePage={this.changePage} />
+      });
+    }
   }
   
 });
 
-ReactDOM.render(<User/>, document.getElementById('body'));
+ReactDOM.render(<UI />, document.body);

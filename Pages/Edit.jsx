@@ -1,4 +1,4 @@
-var Views = React.createClass({
+var Edit = React.createClass({
 
 	render: function()
 	{
