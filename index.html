@@ -177,6 +177,14 @@ $.ajaxSetup({cache: false});
 	    accessToken: 'pk.eyJ1IjoicGV0ZWFtb29yZSIsImEiOiJRdzFrVms0In0.ZRWNwRmHIktO5r-rHjwbSw'
 	}).addTo(map);
 	</script>
+	<script>
+	for(var i=0;i<geojsons.length;i++)
+	{
+		var url = "https://s3.amazonaws.com/sbma44-dc/plows/" + geojsons[i]
+		var snowplow = new L.GeoJSON.AJAX(url)
+		snowplow.addTo(map)
+	}
+	</script>
 	<div id="data"></div>
 </body>
 
