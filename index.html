@@ -152,6 +152,7 @@ html, body { height:100%;width: 100%; margin: 0px;padding: 0px}
 	var map = L.map('map').setView([38.910, -76.982], 12);
 
 	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+		attribution: 'Data: <a href="http://sbma44-dc.s3-website-us-east-1.amazonaws.com/plows/">Snow Plow Data</a>'
 	    maxZoom: 18,
 	    id: 'mapbox.satellite',
 	    accessToken: 'pk.eyJ1IjoicGV0ZWFtb29yZSIsImEiOiJRdzFrVms0In0.ZRWNwRmHIktO5r-rHjwbSw'
