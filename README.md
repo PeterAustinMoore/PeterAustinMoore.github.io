@@ -11,14 +11,3 @@ $ python run.py
 # Build static content
 $ python freeze.py
 ```
-
-See the site in action [here][example].
-
-## License
-Licensed under the [WTFPL][].
-
-[article]: http://www.stevenloria.com/hosting-static-flask-sites-for-free-on-github-pages/
-[example]: http://stevenloria.com/flask-ghpages-example
-[Flask]: http://flask.pocoo.org/
-[WTFPL]: http://www.wtfpl.net/
-[Github Pages]: http://pages.github.com/
